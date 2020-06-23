@@ -1,5 +1,8 @@
 package com.craftinginterpreters.lox;
 
+import com.craftinginterpreters.lox.Expr.Assign;
+import com.craftinginterpreters.lox.Expr.Variable;
+
 // Creates an unambiguous, if ugly, string representation of AST nodes.
 class AstPrinter implements Expr.Visitor<String> {
 
@@ -19,7 +22,8 @@ class AstPrinter implements Expr.Visitor<String> {
 
   @Override
   public String visitLiteralExpr(Expr.Literal expr) {
-    if (expr.value == null) return "nil";
+    if (expr.value == null)
+      return "nil";
     return expr.value.toString();
   }
 
@@ -39,5 +43,17 @@ class AstPrinter implements Expr.Visitor<String> {
     builder.append(")");
 
     return builder.toString();
+  }
+
+  @Override
+  public String visitVariableExpr(Variable expr) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String visitAssignExpr(Assign expr) {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
