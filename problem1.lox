@@ -1,0 +1,37 @@
+
+var sum = 0;
+var max = 1000;
+var i = 1;
+var result = 0;
+
+while (result < max) {
+    result = i * 3;
+    i = i + 1;
+    if (result < max) {
+        sum = sum + result;
+    }
+}
+
+result = 0;
+i = 1;
+
+while (result < max) {
+    result = i * 5;
+    i = i + 1;
+    if (result < max) {
+        sum = sum + result;
+    }
+}
+
+result = 0;
+i = 1;
+
+while (result < max) {
+    result = i * 15;
+    i = i + 1;
+    if (result < max) {
+        sum = sum - result;
+    }
+}
+
+print sum; // 233168
