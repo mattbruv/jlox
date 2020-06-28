@@ -1,0 +1,25 @@
+
+fun isPrime(n) {
+    for (var i = n - 1; i >= 2; i = i - 1) {
+        if (round(n / i) == n / i) {
+            return false;
+        }
+    }
+    return true;
+}
+
+var primeCount = 0;
+var i = 1;
+var target = 10001;
+var found = false;
+
+while (!found) {
+    i = i + 1;
+    if (isPrime(i)) {
+        primeCount = primeCount + 1;
+        if (primeCount == target) {
+            found = true;
+        }
+    }
+}
+print(i);
