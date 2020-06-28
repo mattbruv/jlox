@@ -5,9 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.craftinginterpreters.lox.Expr.Get;
 import com.craftinginterpreters.lox.Expr.Logical;
+import com.craftinginterpreters.lox.Expr.Set;
+import com.craftinginterpreters.lox.Expr.This;
 import com.craftinginterpreters.lox.Expr.Variable;
 import com.craftinginterpreters.lox.Stmt.Block;
+import com.craftinginterpreters.lox.Stmt.Class;
 import com.craftinginterpreters.lox.Stmt.Function;
 import com.craftinginterpreters.lox.Stmt.If;
 import com.craftinginterpreters.lox.Stmt.While;
@@ -49,11 +53,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Object visitVariableExpr(Expr.Variable expr) {
-    //return environment.get(expr.name);
-    return lookupVariable(expr.name, expr); 
+    // return environment.get(expr.name);
+    return lookupVariable(expr.name, expr);
   }
 
-  private Object lookupVariable(Token name, Variable expr) {
+  private Object lookupVariable(Token name, Expr expr) {
     Integer distance = locals.get(expr);
     if (distance != null) {
       return environment.getAt(distance, name.lexeme);
@@ -284,7 +288,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitFunctionStmt(Function stmt) {
-    LoxFunction function = new LoxFunction(stmt, environment);
+    LoxFunction function = new LoxFunction(stmt, environment, false);
     environment.define(stmt.name.lexeme, function);
     return null;
   }
@@ -299,5 +303,47 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   public void resolve(Expr expr, int depth) {
     locals.put(expr, depth);
+  }
+
+  @Override
+  public Void visitClassStmt(Stmt.Class stmt) {
+    environment.define(stmt.name.lexeme, null);
+
+    Map<String, LoxFunction> methods = new HashMap<>();
+
+    for (Stmt.Function method : stmt.methods) {
+      LoxFunction function = new LoxFunction(method, environment, method.name.lexeme.equals("init"));
+      methods.put(method.name.lexeme, function);
+    }
+
+    LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+    environment.assign(stmt.name, klass);
+    return null;
+  }
+
+  @Override
+  public Object visitGetExpr(Get expr) {
+    Object object = evaluate(expr.object);
+    if (object instanceof LoxInstance) {
+      return ((LoxInstance) object).get(expr.name);
+    }
+    throw new RuntimeError(expr.name, "Only instances have properties.");
+  }
+
+  @Override
+  public Object visitSetExpr(Set expr) {
+    Object object = evaluate(expr.object);
+
+    if (!(object instanceof LoxInstance)) {
+      throw new RuntimeError(expr.name, "Only instances have fields.");
+    }
+    Object value = evaluate(expr.value);
+    ((LoxInstance) object).set(expr.name, value);
+    return value;
+  }
+
+  @Override
+  public Object visitThisExpr(Expr.This expr) {
+    return lookupVariable(expr.keyword, expr);
   }
 }
